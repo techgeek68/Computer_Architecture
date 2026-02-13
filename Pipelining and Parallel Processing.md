@@ -1,0 +1,124 @@
+**Objectives**:
+
+  * Understand Flynn's classification of computer architectures.
+  * Demonstrate parallel processing using multiple functional units.
+  * Simulate pipelined floating point arithmetic operations.
+  * Analyze the speedup equation in pipelining.
+  * Implement instruction level pipelining and resolve conflicts.
+  * Perform vector operations and matrix multiplication as examples of SIMD (Single Instruction, Multiple Data) processing.
+
+**Theory**:
+
+**Flynn's classification**
+
+* Flynn's classification divides computer architectures into four categories based on the number of instruction streams and data streams:
+    * SISD (Single Instruction, Single Data):
+        * This refers to traditional sequential processors where a single instruction operates on a single data element at a time. Most conventional uniprocessor systems fall into this category.
+
+    * SIMD (Single Instruction, Multiple Data):
+        * Executes the same instruction on multiple data elements simultaneously. This is commonly seen in vector processors and GPU architectures. It is highly efficient for data parallel tasks such as image processing and scientific computation.
+
+    * MISD (Multiple Instruction, Single Data):
+        * A rare architecture where multiple instruction streams process a single data stream. Systolic arrays and certain fault tolerant systems are sometimes cited as examples.
+
+    * MIMD (Multiple Instruction, Multiple Data):
+        * Supports the parallel execution of multiple independent instructions on different data elements. Modern multicore processors and distributed computing clusters are examples of MIMD architectures.
+
+
+
+
+**Parallel Processing**
+
+Parallel processing involves using multiple functional units to perform tasks simultaneously, which improves computational speed. By dividing a problem into smaller sub tasks and executing them concurrently, the overall execution time is significantly reduced. This lab demonstrates parallel processing using POSIX threads (pthreads), where multiple tasks run on separate threads to simulate independent functional units.
+
+
+
+
+**Pipelining**
+
+Pipelining is a technique for improving throughput by breaking down instruction execution into multiple stages that operate concurrently. These stages typically include:
+  * Instruction Fetch (IF):
+    * Retrieve the instruction from memory.
+  * Instruction Decode (ID):
+    * Decode the instruction and read operands.
+  * Execute (EX):
+    * Perform the arithmetic or logical operation.
+  * Write Back (WB):
+    * Write the result to a register or memory.
+By overlapping the execution of multiple instructions across these stages, pipelining allows a new instruction to begin at each clock cycle, significantly improving throughput.
+
+
+**Speedup Equation**
+
+The theoretical speedup of a pipeline with k stages and n instructions is given by the formula:
+
+`S = (k × n) / (k + n − 1)`
+
+Where:
+  k = number of pipeline stages
+  n = number of instructions
+  As n becomes very large, the speedup approaches k, which is the ideal maximum speedup achievable by a k-stage pipeline.
+
+
+**Vector Processing and SIMD**
+
+Vector processing applies a single instruction to multiple data points simultaneously, which significantly enhances computational efficiency. Instead of processing one element at a time (scalar processing), vector processors operate on entire arrays in a single operation. Common examples include vector addition and matrix multiplication, both of which are demonstrated in this lab.
+
+---
+
+**Source Code**:
+  > Follow the link [Source Code](https://github.com/techgeek68/Computer_Architecture/blob/master/Pipeline_ParallelProcessing.c)
+
+---
+
+**Results**:
+
+Input 1:
+  * Parallel Processing: Task IDs = 1, 2
+  * Pipelined Operation: Operands = 4, 6
+    * Operation = +
+  * Speedup Equation: n = 3, k = 2
+  * Vector A = {1, 2, 3, 4}; Vector B = {5, 6, 7, 8}
+  * Matrix A = {{1, 2}, {3, 4}}; Matrix B = {{5, 6}, {7, 8}}
+
+Output 1:
+
+<img width="885" height="420" alt="Screenshot 2026-02-13 at 6 59 26 AM" src="https://github.com/user-attachments/assets/d9bf87b0-3f5e-4272-92ac-f7fb8e2446ed" />
+
+<img width="882" height="305" alt="Screenshot 2026-02-13 at 7 00 03 AM" src="https://github.com/user-attachments/assets/183bfaa2-7865-4aae-9781-a80dcc37baba" />
+
+<img width="964" height="289" alt="Screenshot 2026-02-13 at 7 06 57 AM" src="https://github.com/user-attachments/assets/cceb1675-020c-4a49-bdcd-041aae73e4cb" />
+
+<img width="969" height="296" alt="Screenshot 2026-02-13 at 7 06 48 AM" src="https://github.com/user-attachments/assets/0fd12900-b6b5-4936-9097-88e7e2a86276" />
+
+
+Input 2:
+  * Parallel Processing: Task IDs = 1001, 2002
+  * Pipelined Operation: Operands = 25.00, 10.00
+    * Operation = −
+  * Speedup Equation: n = 10, k = 4
+  * Vector A = {10, 20, 30, 40}; Vector B = {1, 2, 3, 4}
+  * Matrix A = {{2, 0}, {1, 3}}; Matrix B = {{4, 1}, {2, 5}}
+
+Output 2:
+
+<img width="885" height="369" alt="Screenshot 2026-02-13 at 7 16 38 AM" src="https://github.com/user-attachments/assets/0699ec28-fcd6-4bf4-91ba-c836e4f508f9" />
+
+<img width="883" height="271" alt="Screenshot 2026-02-13 at 7 16 50 AM" src="https://github.com/user-attachments/assets/e9e8c7b4-a73f-4e9b-befa-0bbe830351a9" />
+
+<img width="882" height="288" alt="Screenshot 2026-02-13 at 7 17 02 AM" src="https://github.com/user-attachments/assets/1013bc6c-3a04-4d1b-ad18-044e8d962cae" />
+
+<img width="884" height="275" alt="Screenshot 2026-02-13 at 7 17 15 AM" src="https://github.com/user-attachments/assets/b8bf14fc-a97c-4e44-b1ae-5dae8751057b" />
+
+
+---
+
+**Discussion & Conclusions**:
+
+This lab has successfully shown the fundamental concepts of pipelining and parallel processing in computer architecture. Flynn’s classification system was used as a structured approach to categorize computer architectures according to the characteristics of their instruction and data streams. The parallel processing simulation using POSIX threads has successfully shown how multiple tasks can be processed simultaneously using separate functional units. The pipelined floating-point operations have successfully shown how a single operation is broken down into several stages: Fetch, Decode, Execute, and Write Back, allowing for the overlap of several operations simultaneously.
+
+The equation for speedup, S = (k × n) / (k + n − 1), was successfully tested using two separate sets of inputs, proving that as the number of instructions increases, the speedup will eventually approach the number of pipeline stages. The instruction pipeline simulation has successfully shown this overlap, reducing 16 cycles to only 7 cycles in a pipelined system for 4 instructions over 4 stages.
+
+Lastly, the vector addition and matrix multiplication simulations have successfully shown the applicability of SIMD processing, proving that a single instruction can process multiple data elements simultaneously, resulting in a tremendous increase in computational speed.
+
+---
