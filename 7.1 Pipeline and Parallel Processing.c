@@ -208,7 +208,7 @@ int main() {
     float matA[MAT][MAT], matB[MAT][MAT];
     int k, n;
 
-    printf("=== PIPELINING, PARALLEL PROCESSING & SIMD — HARDWARE LAB ===\n");
+    printf("=== PIPELINING, PARALLEL PROCESSING & SIMD ===\n");
 
     // Flynn's Classification
     printf("\n*** FLYNN'S CLASSIFICATION ***\n");
