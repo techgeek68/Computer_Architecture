@@ -81,7 +81,10 @@ end logicgate;
 
 **Waveforms:** *(Attach simulation waveform here)*
 
----
+
+
+
+
 
 **2. Full Adder**
 
@@ -132,6 +135,7 @@ end logicgate;
 
 
 
+
 **3. Half Subtractor**
 
 **Boolean Expressions:**
@@ -174,6 +178,8 @@ end logicgate;
 ```
 
 **Waveforms:** *(Attach simulation waveform here)*
+
+
 
 
 
@@ -223,6 +229,8 @@ end logicgate;
 ```
 
 **Waveforms:** *(Attach simulation waveform here)*
+
+
 
 
 
@@ -276,6 +284,7 @@ end logicgate;
 ```
 
 **Waveforms:** *(Attach simulation waveform here)*
+
 
 
 **6. 1×4 Demultiplexer (DEMUX)**
