@@ -1,0 +1,341 @@
+**Simulation of Combinational Logic Circuits Using VHDL**
+
+
+**Objective**
+
+To design and simulate combinational logic circuits (Half Adder, Full Adder, Half Subtractor, Full Subtractor, Multiplexer, and Demultiplexer) using VHDL and verify their functionality by observing truth tables and simulation waveforms.
+
+
+
+**Hardware / Software Required**
+
+| S. No. | Specification |
+|--------|---------------------|
+| 1 | Any standard PC/Laptop |
+| 2 | HDL Language: VHDL |
+| 3 | Simulation Tool: ModelSim |
+
+
+
+**Theory**
+
+Combinational logic circuits are digital circuits whose outputs depend solely on the current inputs, with no memory or feedback. They are built using basic logic gates and perform arithmetic and data routing functions. In this experiment, the following combinational circuits are studied:
+
+- **Half Adder:** Adds two single bits and produces a Sum and Carry output.
+- **Full Adder:** Adds three bits (two inputs + carryin) and produces Sum and Carryout.
+- **Half Subtractor:** Subtracts one bit from another, producing a Difference and Borrow.
+- **Full Subtractor:** Subtracts three bits (two inputs + borrowin), producing Difference and Borrowout.
+- **Multiplexer (MUX):** Selects one of many input signals and forwards it to the output based on select lines.
+- **Demultiplexer (DEMUX):** Takes a single input and routes it to one of many outputs based on select lines.
+
+
+
+**1. Half Adder**
+
+**Boolean Expressions:**
+- Sum: `S = A ⊕ B`
+- Carry: `C = A · B`
+
+**Logic Symbol:**
+
+```
+                    ____
+  A ─────────┬─────|    \
+             │     | XOR )o──────────  Sum (S)
+  B ──────┬──┼─────|____/
+          │  │
+          │  │     ____
+          │  └─────|    \
+          │        | AND )──────────  Carry (C)
+          └─────── |____/
+```
+
+**Truth Table:**
+
+| A | B | Sum (S) | Carry (C) |
+|---|---|---------|-----------|
+| 0 | 0 |    0    |     0     |
+| 0 | 1 |    1    |     0     |
+| 1 | 0 |    1    |     0     |
+| 1 | 1 |    0    |     1     |
+
+**VHDL Code:**
+
+```vhdl name=half_adder.vhd
+library ieee;
+use ieee.std_logic_1164.all;
+
+entity half_adder is
+    port (
+        a, b : in  std_logic;
+        s, c : out std_logic
+    );
+end half_adder;
+
+architecture logicgate of half_adder is
+begin
+    s <= a xor b;
+    c <= a and b;
+end logicgate;
+```
+
+**Waveforms:** *(Attach simulation waveform here)*
+
+---
+
+**2. Full Adder**
+
+**Boolean Expressions:**
+- Sum: `S = A ⊕ B ⊕ Cin`
+- Carry: `Cout = (A · B) + (Cin · (A ⊕ B))`
+
+**Logic Symbol:**
+
+```
+
+```
+
+**Truth Table:**
+
+| A | B | Cin | Sum (S) | Carry Out (Cout) |
+|---|---|-----|---------|-----------------|
+| 0 | 0 |  0  |    0    |        0        |
+| 0 | 0 |  1  |    1    |        0        |
+| 0 | 1 |  0  |    1    |        0        |
+| 0 | 1 |  1  |    0    |        1        |
+| 1 | 0 |  0  |    1    |        0        |
+| 1 | 0 |  1  |    0    |        1        |
+| 1 | 1 |  0  |    0    |        1        |
+| 1 | 1 |  1  |    1    |        1        |
+
+**VHDL Code:**
+
+```vhdl name=full_adder.vhd
+library ieee;
+use ieee.std_logic_1164.all;
+
+entity full_adder is
+    port (
+        a, b, cin : in  std_logic;
+        s, cout   : out std_logic
+    );
+end full_adder;
+
+architecture logicgate of full_adder is
+begin
+    s    <= a xor b xor cin;
+    cout <= (a and b) or (cin and (a xor b));
+end logicgate;
+```
+
+**Waveforms:** *(Attach simulation waveform here)*
+
+
+
+**3. Half Subtractor**
+
+**Boolean Expressions:**
+- Difference: `D = A ⊕ B`
+- Borrow: `Bout = Ā · B`
+
+**Logic Symbol:**
+
+```
+
+```
+
+**Truth Table:**
+
+| A | B | Difference (D) | Borrow (Bout) |
+|---|---|----------------|---------------|
+| 0 | 0 |       0        |       0       |
+| 0 | 1 |       1        |       1       |
+| 1 | 0 |       1        |       0       |
+| 1 | 1 |       0        |       0       |
+
+**VHDL Code:**
+
+```vhdl name=half_subtractor.vhd
+library ieee;
+use ieee.std_logic_1164.all;
+
+entity half_subtractor is
+    port (
+        a, b    : in  std_logic;
+        d, bout : out std_logic
+    );
+end half_subtractor;
+
+architecture logicgate of half_subtractor is
+begin
+    d    <= a xor b;
+    bout <= (not a) and b;
+end logicgate;
+```
+
+**Waveforms:** *(Attach simulation waveform here)*
+
+
+
+**4. Full Subtractor**
+
+**Boolean Expressions:**
+- Difference: `D = A ⊕ B ⊕ Bin`
+- Borrow: `Bout = (Ā · B) + (Bin · (A ⊕ B)̄)`
+
+**Logic Symbol:**
+
+```
+
+```
+
+**Truth Table:**
+
+| A | B | Bin | Difference (D) | Borrow Out (Bout) |
+|---|---|-----|----------------|-------------------|
+| 0 | 0 |  0  |       0        |         0         |
+| 0 | 0 |  1  |       1        |         1         |
+| 0 | 1 |  0  |       1        |         1         |
+| 0 | 1 |  1  |       0        |         1         |
+| 1 | 0 |  0  |       1        |         0         |
+| 1 | 0 |  1  |       0        |         0         |
+| 1 | 1 |  0  |       0        |         0         |
+| 1 | 1 |  1  |       1        |         1         |
+
+**VHDL Code:**
+
+```vhdl name=full_subtractor.vhd
+library ieee;
+use ieee.std_logic_1164.all;
+
+entity full_subtractor is
+    port (
+        a, b, bin : in  std_logic;
+        d, bout   : out std_logic
+    );
+end full_subtractor;
+
+architecture logicgate of full_subtractor is
+begin
+    d    <= a xor b xor bin;
+    bout <= ((not a) and b) or (bin and (not(a xor b)));
+end logicgate;
+```
+
+**Waveforms:** *(Attach simulation waveform here)*
+
+
+
+**5. 4×1 Multiplexer (MUX)**
+
+**Boolean Expression:**
+`Y = (S1̄ · S0̄ · I0) + (S1̄ · S0 · I1) + (S1 · S0̄ · I2) + (S1 · S0 · I3)`
+
+**Logic Symbol:**
+
+```
+
+```
+
+**Truth Table:**
+
+| S1 | S0 | Output (Y) |
+|----|----|-----------|
+|  0 |  0 |    I0     |
+|  0 |  1 |    I1     |
+|  1 |  0 |    I2     |
+|  1 |  1 |    I3     |
+
+**VHDL Code:**
+
+```vhdl name=mux_4x1.vhd
+library ieee;
+use ieee.std_logic_1164.all;
+
+entity mux_4x1 is
+    port (
+        i0, i1, i2, i3 : in  std_logic;
+        s               : in  std_logic_vector(1 downto 0);
+        y               : out std_logic
+    );
+end mux_4x1;
+
+architecture logicgate of mux_4x1 is
+begin
+    process(i0, i1, i2, i3, s)
+    begin
+        case s is
+            when "00"   => y <= i0;
+            when "01"   => y <= i1;
+            when "10"   => y <= i2;
+            when "11"   => y <= i3;
+            when others => y <= '0';
+        end case;
+    end process;
+end logicgate;
+```
+
+**Waveforms:** *(Attach simulation waveform here)*
+
+
+**6. 1×4 Demultiplexer (DEMUX)**
+
+**Boolean Expression:**
+- `Y0 = I · S1̄ · S0̄`
+- `Y1 = I · S1̄ · S0`
+- `Y2 = I · S1 · S0̄`
+- `Y3 = I · S1 · S0`
+
+**Logic Symbol:**
+
+```
+
+```
+
+**Truth Table:**
+
+| S1 | S0 | Y0 | Y1 | Y2 | Y3 |
+|----|----|----|----|----|----|
+|  0 |  0 |  I |  0 |  0 |  0 |
+|  0 |  1 |  0 |  I |  0 |  0 |
+|  1 |  0 |  0 |  0 |  I |  0 |
+|  1 |  1 |  0 |  0 |  0 |  I |
+
+**VHDL Code:**
+
+```vhdl name=demux_1x4.vhd
+library ieee;
+use ieee.std_logic_1164.all;
+
+entity demux_1x4 is
+    port (
+        i       : in  std_logic;
+        s       : in  std_logic_vector(1 downto 0);
+        y0, y1,
+        y2, y3  : out std_logic
+    );
+end demux_1x4;
+
+architecture logicgate of demux_1x4 is
+begin
+    process(i, s)
+    begin
+        y0 <= '0'; y1 <= '0';
+        y2 <= '0'; y3 <= '0';
+        case s is
+            when "00"   => y0 <= i;
+            when "01"   => y1 <= i;
+            when "10"   => y2 <= i;
+            when "11"   => y3 <= i;
+            when others => null;
+        end case;
+    end process;
+end logicgate;
+```
+
+**Waveforms:** *(Attach simulation waveform here)*
+
+
+**Conclusion**
+
+This experiment gave hands-on practice in coding VHDL for basic combinational logic elements using both data flow and behavioral coding styles. The concurrent signal assignment statements and process-based statements in VHDL provide a straightforward, easy-to-read approach to coding combinational logic elements. The simulation waveforms for this experiment clearly showed that each combinational logic element will produce the correct output for all possible input combinations. This exercise is a fundamental building block for designing more complex arithmetic elements, data selectors, etc.
