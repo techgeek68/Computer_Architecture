@@ -219,27 +219,28 @@ int main() {
 
     // Booth's Algorithm: iterate over each bit of the multiplier
     for (i = 0; i < NUM_BITS; i++) {
-        printf("\nStep %d (Q[%d]=%d, Q-1=%d): ", i + 1, i, anum[i], q);
+        int q0 = anumcp[0];  // Examine LSB of current Q register
+        printf("\nStep %d (Q[0]=%d, Q-1=%d): ", i + 1, q0, q);
 
-        if (anum[i] == q) {
-            // Qᵢ == Qᵢ₋₁: No operation, just shift
+        if (q0 == q) {
+            // Q₀ == Q₋₁: No operation, just shift
             printf("No operation (same bits)");
             arshift();
-        } else if (anum[i] == 1 && q == 0) {
-            // Qᵢ=1, Qᵢ₋₁=0: Subtract multiplicand (P = P - B)
+        } else if (q0 == 1 && q == 0) {
+            // Q₀=1, Q₋₁=0: Subtract multiplicand (P = P - B)
             printf("P = P - B (Subtract)\n");
             printf("SUB B:    ");
             add(bcomp);
             arshift();
         } else {
-            // Qᵢ=0, Qᵢ₋₁=1: Add multiplicand (P = P + B)
+            // Q₀=0, Q₋₁=1: Add multiplicand (P = P + B)
             printf("P = P + B (Add)\n");
             printf("ADD B:    ");
             add(bnum);
             arshift();
         }
 
-        q = anum[i];  // Update Q₋₁ for next iteration
+        q = q0;  // Update Q₋₁ with the bit we just examined
     }
 
     // Display final product in binary
