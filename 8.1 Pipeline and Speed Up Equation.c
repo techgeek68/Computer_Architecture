@@ -259,7 +259,7 @@ int main() {
         printf("\n  +------------------------+\n");
         printf("  |       MAIN MENU        |\n");
         printf("  +------------------------+\n");
-        printf("  | [1] Floating Point Pipeline|\n");
+        printf("  | [1] FP Calculation     |\n");
         printf("  | [2] Speedup Analysis   |\n");
         printf("  | [3] Speedup Table      |\n");
         printf("  | [4] Pipeline Diagram   |\n");
