@@ -19,13 +19,14 @@
 
 #define VEC 4
 #define MAT 2
-#define N_INST 4
 #define N_TASKS 4
 
 // ==================== FLYNN'S CLASSIFICATION ====================
 
 void sisd_demo(float a, float b) {
     printf("\n[SISD] Scalar ADD: %.2f + %.2f = %.2f\n", a, b, a + b);
+    printf("  Description: Single instruction operates on single data element.\n");
+    printf("  This is the baseline sequential processing model.\n");
 }
 
 void simd_demo(float *A, float *B) {
@@ -44,6 +45,7 @@ void simd_demo(float *A, float *B) {
     printf("  WARNING: No SIMD ISA detected, using scalar fallback.\n");
 #endif
 
+    printf("  Description: Single instruction processes multiple data elements simultaneously.\n");
     for (int i = 0; i < VEC; i++)
         printf("  R[%d] = %.2f + %.2f = %.2f\n", i, A[i], B[i], R[i]);
 }
@@ -51,6 +53,8 @@ void simd_demo(float *A, float *B) {
 void misd_demo(float d) {
     printf("\n[MISD] 3 instructions on same data (%.2f):\n", d);
     printf("  ADD 10 = %.2f | MUL 2 = %.2f | SUB 5 = %.2f\n", d+10, d*2, d-5);
+    printf("  Description: Multiple instructions operate on the same data stream.\n");
+    printf("  This is a rare architecture, often used in fault-tolerant systems.\n");
 }
 
 typedef struct { int id; float data, result; pthread_mutex_t *mtx; } mimd_t;
@@ -70,6 +74,7 @@ void mimd_demo(float *data) {
     pthread_t th[N_TASKS]; mimd_t tasks[N_TASKS];
     pthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;
     printf("\n[MIMD] %d threads, different instructions, different data:\n", N_TASKS);
+    printf("  Description: Multiple threads execute different instructions on different data.\n");
     for (int i = 0; i < N_TASKS; i++) {
         tasks[i] = (mimd_t){i, data[i], 0, &mtx};
         pthread_create(&th[i], NULL, mimd_worker, &tasks[i]);
@@ -78,44 +83,60 @@ void mimd_demo(float *data) {
     pthread_mutex_destroy(&mtx);
 }
 
-// ==================== PIPELINING ====================
+// ==================== SIMD VECTOR OPERATIONS ====================
 
-void pipeline_demo(float ops[][2], char *signs, int n) {
-    const char *stg[] = {"IF", "ID", "EX", "WB"};
-    int total = n + 3;
-    float results[N_INST];
+void simd_vector_add(float *A, float *B) {
+    float R[VEC];
+    printf("\n--- SIMD Vector Addition ---\n");
 
-    printf("\n--- Pipeline (%d instructions, 4 stages, %d cycles) ---\n", n, total);
-    for (int c = 0; c < total; c++) {
-        printf("C%d: ", c + 1);
-        for (int i = 0; i < n; i++) {
-            int s = c - i;
-            if (s >= 0 && s < 4) {
-                if (s == 2) results[i] = (signs[i] == '+') ? ops[i][0] + ops[i][1] : ops[i][0] - ops[i][1];
-                if (s == 2) printf("[I%d:%s=%.1f] ", i+1, stg[s], results[i]);
-                else        printf("[I%d:%s] ", i+1, stg[s]);
-            }
-        }
-        printf("\n");
-    }
-    printf("Pipelined: %d cycles | Non-pipelined: %d cycles\n", total, n * 4);
+#if USE_SSE
+    __m128 va = _mm_loadu_ps(A), vb = _mm_loadu_ps(B);
+    _mm_storeu_ps(R, _mm_add_ps(va, vb));
+    printf("  Hardware: x86 SSE _mm_add_ps\n");
+    printf("  Operation: 4 parallel additions in 1 instruction\n");
+#elif USE_NEON
+    vst1q_f32(R, vaddq_f32(vld1q_f32(A), vld1q_f32(B)));
+    printf("  Hardware: ARM NEON vaddq_f32\n");
+    printf("  Operation: 4 parallel additions in 1 instruction\n");
+#else
+    for (int i = 0; i < VEC; i++) R[i] = A[i] + B[i];
+    printf("  WARNING: No SIMD ISA detected, using scalar fallback.\n");
+#endif
 
-    for (int i = 0; i < n; i++)
-        printf("  I%d: %.2f %c %.2f = %.2f\n", i+1, ops[i][0], signs[i], ops[i][1], results[i]);
+    printf("\n  Input A:  [");
+    for (int i = 0; i < VEC; i++) printf(" %.2f", A[i]);
+    printf(" ]\n  Input B:  [");
+    for (int i = 0; i < VEC; i++) printf(" %.2f", B[i]);
+    printf(" ]\n  Result R: [");
+    for (int i = 0; i < VEC; i++) printf(" %.2f", R[i]);
+    printf(" ]\n");
 }
 
-// ==================== SPEEDUP EQUATION ====================
+void simd_vector_mul(float *A, float *B) {
+    float R[VEC];
+    printf("\n--- SIMD Vector Multiplication ---\n");
 
-void speedup_demo(int k, int n) {
-    printf("\nSpeedup: S = (k×n)/(k+n-1) = (%d×%d)/(%d) = %.4f\n", k, n, k+n-1, (float)(k*n)/(k+n-1));
-    printf("Efficiency: %.2f%% | Max (n→∞): S→%d\n", ((float)(k*n)/(k+n-1))/k*100, k);
+#if USE_SSE
+    __m128 va = _mm_loadu_ps(A), vb = _mm_loadu_ps(B);
+    _mm_storeu_ps(R, _mm_mul_ps(va, vb));
+    printf("  Hardware: x86 SSE _mm_mul_ps\n");
+    printf("  Operation: 4 parallel multiplications in 1 instruction\n");
+#elif USE_NEON
+    vst1q_f32(R, vmulq_f32(vld1q_f32(A), vld1q_f32(B)));
+    printf("  Hardware: ARM NEON vmulq_f32\n");
+    printf("  Operation: 4 parallel multiplications in 1 instruction\n");
+#else
+    for (int i = 0; i < VEC; i++) R[i] = A[i] * B[i];
+    printf("  WARNING: No SIMD ISA detected, using scalar fallback.\n");
+#endif
 
-    int tv[] = {1, 5, 10, 50, 100, 1000};
-    printf("\n  %-6s %-8s %-8s\n", "n", "Speedup", "Eff%");
-    for (int i = 0; i < 6; i++) {
-        float s = (float)(k * tv[i]) / (k + tv[i] - 1);
-        printf("  %-6d %-8.3f %-7.1f%%\n", tv[i], s, s/k*100);
-    }
+    printf("\n  Input A:  [");
+    for (int i = 0; i < VEC; i++) printf(" %.2f", A[i]);
+    printf(" ]\n  Input B:  [");
+    for (int i = 0; i < VEC; i++) printf(" %.2f", B[i]);
+    printf(" ]\n  Result R: [");
+    for (int i = 0; i < VEC; i++) printf(" %.2f", R[i]);
+    printf(" ]\n");
 }
 
 // ==================== SIMD MATRIX MULTIPLY ====================
@@ -152,8 +173,16 @@ void simd_matmul(float A[MAT][MAT], float B[MAT][MAT]) {
     printf("  WARNING: No SIMD, scalar fallback.\n");
 #endif
 
+    printf("  Operation: Parallel element-wise multiplication for matrix computation\n");
+    printf("\n  Matrix A:\n");
     for (int i = 0; i < MAT; i++)
-        printf("  [ %.2f  %.2f ]\n", R[i][0], R[i][1]);
+        printf("    [ %.2f  %.2f ]\n", A[i][0], A[i][1]);
+    printf("\n  Matrix B:\n");
+    for (int i = 0; i < MAT; i++)
+        printf("    [ %.2f  %.2f ]\n", B[i][0], B[i][1]);
+    printf("\n  Result (A x B):\n");
+    for (int i = 0; i < MAT; i++)
+        printf("    [ %.2f  %.2f ]\n", R[i][0], R[i][1]);
 }
 
 // ==================== PARALLEL PROCESSING (TIMED) ====================
@@ -166,7 +195,7 @@ void *par_worker(void *arg) {
     for (int i = 0; i < 1000000; i++) v = v * 1.000001f + 0.000001f;
     t->out = v;
     pthread_mutex_lock(t->mtx);
-    printf("  Task %d: %.2f → %.6f\n", t->id, t->in, t->out);
+    printf("  Task %d: %.2f -> %.6f\n", t->id, t->in, t->out);
     pthread_mutex_unlock(t->mtx);
     return NULL;
 }
@@ -175,17 +204,25 @@ void parallel_demo(float *inputs) {
     pthread_t th[N_TASKS]; par_t tasks[N_TASKS];
     pthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;
     struct timespec s, e;
+    float seq_results[N_TASKS];
 
-    // Sequential
+    printf("\n--- Parallel Processing Performance Comparison ---\n");
+    printf("  Workload: 1,000,000 floating-point operations per task\n");
+    printf("  Tasks: %d independent computational tasks\n\n", N_TASKS);
+
+    // Sequential execution
+    printf("Sequential execution:\n");
     clock_gettime(CLOCK_MONOTONIC, &s);
     for (int i = 0; i < N_TASKS; i++) {
         float v = inputs[i];
         for (int j = 0; j < 1000000; j++) v = v * 1.000001f + 0.000001f;
+        seq_results[i] = v;
+        printf("  Task %d: %.2f -> %.6f\n", i, inputs[i], seq_results[i]);
     }
     clock_gettime(CLOCK_MONOTONIC, &e);
     long seq = (e.tv_sec-s.tv_sec)*1000000L + (e.tv_nsec-s.tv_nsec)/1000;
 
-    // Parallel
+    // Parallel execution
     clock_gettime(CLOCK_MONOTONIC, &s);
     printf("\nParallel execution (%d threads):\n", N_TASKS);
     for (int i = 0; i < N_TASKS; i++) {
@@ -196,7 +233,11 @@ void parallel_demo(float *inputs) {
     clock_gettime(CLOCK_MONOTONIC, &e);
     long par = (e.tv_sec-s.tv_sec)*1000000L + (e.tv_nsec-s.tv_nsec)/1000;
 
-    printf("Sequential: %ldµs | Parallel: %ldµs | Speedup: %.2fx\n", seq, par, par>0?(float)seq/par:0);
+    printf("\n--- Performance Results ---\n");
+    printf("  Sequential time: %ld microseconds\n", seq);
+    printf("  Parallel time:   %ld microseconds\n", par);
+    printf("  Speedup:         %.2fx\n", par > 0 ? (float)seq/par : 0);
+    printf("  Efficiency:      %.1f%%\n", par > 0 ? ((float)seq/par)/N_TASKS*100 : 0);
     pthread_mutex_destroy(&mtx);
 }
 
@@ -204,65 +245,73 @@ void parallel_demo(float *inputs) {
 
 int main() {
     float a, b, vecA[VEC], vecB[VEC], mimd_data[N_TASKS], par_in[N_TASKS];
-    float pip_ops[N_INST][2]; char pip_signs[N_INST];
     float matA[MAT][MAT], matB[MAT][MAT];
-    int k, n;
 
-    printf("=== PIPELINING, PARALLEL PROCESSING & SIMD ===\n");
+    printf("=== PARALLEL PROCESSING & SIMD OPERATIONS ===\n");
+    printf("This lab demonstrates parallel computing concepts:\n");
+    printf("  - Flynn's Classification (SISD, SIMD, MISD, MIMD)\n");
+    printf("  - SIMD Vector Operations\n");
+    printf("  - SIMD Matrix Multiplication\n");
+    printf("  - Multithreaded Parallel Processing\n");
 
     // Flynn's Classification
-    printf("\n*** FLYNN'S CLASSIFICATION ***\n");
-    printf("SISD operands (A B): "); scanf("%f %f", &a, &b);
+    printf("\n**************************************************\n");
+    printf("*** SECTION 1: FLYNN'S CLASSIFICATION ***\n");
+    printf("**************************************************\n");
+
+    printf("\nSISD operands (A B): "); scanf("%f %f", &a, &b);
     sisd_demo(a, b);
 
-    printf("SIMD Vector A (%d floats): ", VEC);
+    printf("\nSIMD Vector A (%d floats): ", VEC);
     for (int i = 0; i < VEC; i++) scanf("%f", &vecA[i]);
     printf("SIMD Vector B (%d floats): ", VEC);
     for (int i = 0; i < VEC; i++) scanf("%f", &vecB[i]);
     simd_demo(vecA, vecB);
 
-    printf("MISD data value: "); scanf("%f", &a);
+    printf("\nMISD data value: "); scanf("%f", &a);
     misd_demo(a);
 
-    printf("MIMD data (%d values): ", N_TASKS);
+    printf("\nMIMD data (%d values): ", N_TASKS);
     for (int i = 0; i < N_TASKS; i++) scanf("%f", &mimd_data[i]);
     mimd_demo(mimd_data);
 
-    // Pipelining
-    printf("\n*** PIPELINING ***\n");
-    for (int i = 0; i < N_INST; i++) {
-        printf("I%d (A B op): ", i+1);
-        scanf("%f %f %c", &pip_ops[i][0], &pip_ops[i][1], &pip_signs[i]);
-    }
-    pipeline_demo(pip_ops, pip_signs, N_INST);
+    // SIMD Vector Operations
+    printf("\n**************************************************\n");
+    printf("*** SECTION 2: SIMD VECTOR OPERATIONS ***\n");
+    printf("**************************************************\n");
 
-    // Speedup
-    printf("\n*** SPEEDUP EQUATION ***\n");
-    printf("Stages(k) Instructions(n): "); scanf("%d %d", &k, &n);
-    speedup_demo(k, n);
-
-    // SIMD Vector Addition
-    printf("\n*** SIMD VECTOR ADDITION ***\n");
-    printf("Vector A (%d): ", VEC);
+    printf("\nVector A (%d floats): ", VEC);
     for (int i = 0; i < VEC; i++) scanf("%f", &vecA[i]);
-    printf("Vector B (%d): ", VEC);
+    printf("Vector B (%d floats): ", VEC);
     for (int i = 0; i < VEC; i++) scanf("%f", &vecB[i]);
-    simd_demo(vecA, vecB);
+    simd_vector_add(vecA, vecB);
+    simd_vector_mul(vecA, vecB);
 
     // SIMD Matrix Multiplication
-    printf("\n*** SIMD MATRIX MULTIPLICATION ***\n");
-    printf("Matrix A (%dx%d, row-major): ", MAT, MAT);
+    printf("\n**************************************************\n");
+    printf("*** SECTION 3: SIMD MATRIX MULTIPLICATION ***\n");
+    printf("**************************************************\n");
+
+    printf("\nMatrix A (%dx%d, row-major): ", MAT, MAT);
     for (int i = 0; i < MAT; i++) for (int j = 0; j < MAT; j++) scanf("%f", &matA[i][j]);
     printf("Matrix B (%dx%d, row-major): ", MAT, MAT);
     for (int i = 0; i < MAT; i++) for (int j = 0; j < MAT; j++) scanf("%f", &matB[i][j]);
     simd_matmul(matA, matB);
 
     // Parallel Processing
-    printf("\n*** PARALLEL PROCESSING ***\n");
-    printf("Inputs (%d values): ", N_TASKS);
+    printf("\n**************************************************\n");
+    printf("*** SECTION 4: PARALLEL PROCESSING WITH PTHREADS ***\n");
+    printf("**************************************************\n");
+
+    printf("\nInputs (%d values): ", N_TASKS);
     for (int i = 0; i < N_TASKS; i++) scanf("%f", &par_in[i]);
     parallel_demo(par_in);
 
     printf("\n=== LAB COMPLETE ===\n");
+    printf("Summary:\n");
+    printf("  - Demonstrated all four Flynn's classification categories\n");
+    printf("  - Showed SIMD vector addition and multiplication\n");
+    printf("  - Performed SIMD-accelerated matrix multiplication\n");
+    printf("  - Compared sequential vs parallel execution performance\n");
     return 0;
 }
