@@ -224,7 +224,7 @@ void analyze_speedup_vs_instructions(int k) {
     }
     printf("  +--------+---------------+------------+------------+-----------+\n");
     
-    printf("\n  Key Observations:\n");
+    printf("\n    Observations:\n");
     printf("    1. Speedup increases with more instructions\n");
     printf("    2. Speedup asymptotically approaches k = %d\n", k);
     printf("    3. Efficiency = Speedup / k (expressed as percentage)\n");
@@ -250,7 +250,7 @@ void analyze_speedup_vs_stages(int n) {
     }
     printf("  +--------+---------------+------------+------------+----------+\n");
     
-    printf("\n  Key Observations:\n");
+    printf("\n    Observations:\n");
     printf("    1. Deeper pipelines have higher maximum speedup potential\n");
     printf("    2. But achieved percentage decreases with depth (for fixed n)\n");
     printf("    3. Very deep pipelines need many instructions to be efficient\n");
@@ -284,7 +284,7 @@ void analyze_speedup_vs_stalls(int k, int n) {
     }
     printf("  +--------+--------+------------+------------+-------------+\n");
     
-    printf("\n  Key Observations:\n");
+    printf("\n    Observations:\n");
     printf("    1. Each stall cycle reduces overall speedup\n");
     printf("    2. Impact of stalls is more severe with fewer instructions\n");
     printf("    3. Stall reduction is critical for pipeline efficiency\n");
@@ -478,7 +478,7 @@ void generate_performance_report(PipelineConfig config) {
     printf("  +----------------------------------+------------------+\n");
     printf("  | Metric                           | Cycles           |\n");
     printf("  +----------------------------------+------------------+\n");
-    printf("  | Non-Pipelined Execution Time     | %-16d |\n", metrics.cycles_non_pipelined);
+    printf("  | Non Pipelined Execution Time     | %-16d |\n", metrics.cycles_non_pipelined);
     printf("  | Pipelined Execution Time         | %-16d |\n", metrics.cycles_pipelined);
     printf("  | Cycles Saved                     | %-16d |\n", metrics.cycles_saved);
     printf("  | Time Reduction                   | %-15.2f%% |\n", 
@@ -611,7 +611,7 @@ void compare_configurations() {
     }
     printf("  +----------------------------+--------+----------+----------+--------+\n");
     
-    printf("\n  Key Insights:\n");
+    printf("\n Insights:\n");
     printf("    1. More stages increase maximum speedup but decrease efficiency\n");
     printf("    2. Stalls significantly impact performance\n");
     printf("    3. Clock overhead reduces effective speedup\n");
@@ -649,7 +649,7 @@ void demonstrate_amdahls_law() {
     }
     printf("  +------------------+----------+----------+----------+----------+\n");
     
-    printf("\n  Key Insight:\n");
+    printf("\n    Insight:\n");
     printf("    - Even with k=32 pipeline, if only 90%% can be pipelined,\n");
     printf("      maximum speedup is limited to ~7.8x (not 32x)\n");
     printf("    - The serial portion dominates as pipeline depth increases\n");
